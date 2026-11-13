@@ -23,3 +23,11 @@ No script here changes your live Dokploy service, logs into a mailbox, imports c
 ## Source obligations and release identity
 
 Each release tags both repositories and supplies corresponding source, build scripts and deployment instructions. `/source` and the CRM sidebar link make this discoverable. If you apply further patches, provide their matching source too. Client data, credentials, provider journals and mailbox passwords are excluded. Source bundles can be made with tools/export_source.py after committing both trees.
+
+## 0.1.1 build-cache repair
+
+Docker does not include build-secret contents in its cache checksum. A deployment using `--build` can therefore reuse a Framework-only app-install layer after FRAPPE_APPS_JSON changes. Version 0.1.1 uses the canonical public manifest SHA256 as CACHE_BUST, requires the BuildKit secret, validates that the supplied manifest matches this release and checks/imports both apps in the builder. A mismatch now stops the build with a clear error rather than producing an incomplete runtime image. No Docker cache pruning or volume deletion is needed.
+
+Replace BOTH the Compose YAML and the FRAPPE_APPS_JSON Environment value from this release's environment.example; keep existing hostname/passwords/volumes. Dockerfile_inline contains no dollar variables, avoiding accidental Compose interpolation of Docker build arguments. Its equivalent standalone source is deploy/Containerfile, adapted from the pinned upstream builder with its licence in deploy/FRAPPE-DOCKER-LICENSE.
+
+If using the existing `crm-frappe-ghecbc` service, a successful build is followed by the deliberate existing-site guard in create-site. That guard is expected: use the existing-site upgrade steps above after backup and staging validation. Do not delete site_config.json, forge a completion marker or reset volumes to get past it.

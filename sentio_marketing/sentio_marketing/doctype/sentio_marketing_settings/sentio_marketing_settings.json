@@ -40,7 +40,7 @@
       "fieldname": "app_source_url",
       "label": "Marketing app source",
       "fieldtype": "Data",
-      "default": "https://github.com/TheophilusChinomona/sentio-marketing/tree/v0.1.0"
+      "default": "https://github.com/TheophilusChinomona/sentio-marketing/tree/v0.1.1"
     }
   ],
   "permissions": [

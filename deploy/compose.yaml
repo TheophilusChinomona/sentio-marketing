@@ -1,4 +1,4 @@
-# Staging first. Separate project/site per client. Existing volumes are not reset.
+# 0.1.1: mandatory manifest, content-based cache key and verified apps.
 services:
   db:
     image: mariadb:11.8
@@ -57,7 +57,7 @@ services:
       timeout: 3s
       retries: 20
   configurator:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: 'no'
     volumes: &id001
@@ -85,7 +85,7 @@ services:
     pull_policy: never
     working_dir: /home/frappe/frappe-bench
   create-site:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: 'no'
     volumes: *id001
@@ -114,7 +114,7 @@ services:
     pull_policy: never
     working_dir: /home/frappe/frappe-bench
   backend:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: unless-stopped
     volumes: *id001
@@ -126,14 +126,34 @@ services:
     working_dir: /home/frappe/frappe-bench
     build:
       context: https://github.com/frappe/frappe_docker.git#85ad653360e4670c2e885c4283d293e7b9efeda9
-      dockerfile: images/layered/Containerfile
       args:
-        FRAPPE_BRANCH: version-16
-        FRAPPE_PATH: https://github.com/frappe/frappe
+        CACHE_BUST: d58aba764a3931297b22e017288e94afa7a8fdd14c4f53a1d15c96d23079d7df
       secrets:
       - apps_json
+      dockerfile_inline: "# syntax=docker/dockerfile:1\n# Adapted from frappe/frappe_docker, pinned revision 85ad653360e4670c2e885c4283d293e7b9efeda9.\n\
+        # Upstream licence: FRAPPE-DOCKER-LICENSE. Added mandatory, cache-keyed app manifest verification.\n\n\n\
+        FROM frappe/build:version-16 AS builder\n\nARG CACHE_BUST=\"\"\n\nUSER frappe\n\n# Apply group permissions\
+        \ after app installation and cleanup, before the runtime COPY.\nRUN --mount=type=secret,id=apps_json,target=/opt/frappe/apps.json,uid=1000,gid=0,required=true\
+        \ \\\n  python -c 'import hashlib,json,os,sys; actual=hashlib.sha256(json.dumps(json.load(open(\"/opt/frappe/apps.json\"\
+        )),sort_keys=True,separators=(\",\",\":\")).encode()).hexdigest(); sys.exit(0 if actual==os.environ[\"CACHE_BUST\"\
+        ] else \"ERROR: FRAPPE_APPS_JSON does not match this release. Copy its exact value from deploy/environment.example.\"\
+        )' && \\\n  bench init --apps_path=/opt/frappe/apps.json \\\n    --frappe-branch=version-16 \\\n    --frappe-path=https://github.com/frappe/frappe\
+        \ \\\n    --no-procfile --no-backups --skip-redis-config-generation --verbose \\\n    /home/frappe/frappe-bench\
+        \ && \\\n  cd /home/frappe/frappe-bench && \\\n  test -d apps/crm && test -d apps/sentio_marketing && \\\
+        \n  env/bin/python -c \"import crm, sentio_marketing; print('Verified CRM and Sentio Marketing in the built\
+        \ image')\" && \\\n  echo \"{}\" > sites/common_site_config.json && \\\n  find apps -mindepth 1 -path \"\
+        */.git\" | xargs rm -fr && \\\n  chmod -R g=u /home/frappe/frappe-bench\n\nFROM frappe/base:version-16 AS\
+        \ backend\n\nUSER frappe\n\nCOPY --from=builder --chown=frappe:0 /home/frappe/frappe-bench /home/frappe/frappe-bench\n\
+        \nWORKDIR /home/frappe/frappe-bench\n\n# Keep the COPY destination group-writable and move assets to image-layer\
+        \ storage\nRUN chmod g=u /home/frappe/frappe-bench && \\\n  cp -r /home/frappe/frappe-bench/sites/assets\
+        \ /home/frappe/frappe-bench/assets && \\\n  rm -rf /home/frappe/frappe-bench/sites/assets\n\nVOLUME [ \\\
+        \n  \"/home/frappe/frappe-bench/sites\", \\\n  \"/home/frappe/frappe-bench/logs\" \\\n]\n\nUSER root\n#\
+        \ This entrypoint script link build assets of the image to the mounted sites volume at container initialization\n\
+        COPY resources/core/main-entrypoint.sh /usr/local/bin/entrypoint.sh\nRUN chmod 755 /usr/local/bin/entrypoint.sh\n\
+        \nCOPY resources/core/start.sh /usr/local/bin/start.sh\nRUN chmod 755 /usr/local/bin/start.sh\n\nUSER frappe\n\
+        ENTRYPOINT [\"/usr/local/bin/entrypoint.sh\"]\n\nCMD [\"start.sh\"]\n"
   websocket:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: unless-stopped
     volumes: *id001
@@ -147,7 +167,7 @@ services:
     pull_policy: never
     working_dir: /home/frappe/frappe-bench
   worker:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: unless-stopped
     volumes: *id001
@@ -163,7 +183,7 @@ services:
     pull_policy: never
     working_dir: /home/frappe/frappe-bench
   scheduler:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: unless-stopped
     volumes: *id001
@@ -177,7 +197,7 @@ services:
     pull_policy: never
     working_dir: /home/frappe/frappe-bench
   frontend:
-    image: local/sentio-crm:0.1.0
+    image: local/sentio-crm:0.1.1
     platform: linux/amd64
     restart: unless-stopped
     volumes: *id001

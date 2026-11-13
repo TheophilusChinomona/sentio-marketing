@@ -246,7 +246,7 @@ def source_information():
     return {
         "license": "AGPL-3.0",
         "crm": "https://github.com/TheophilusChinomona/sentio-crm/tree/sentio-v0.1.0",
-        "marketing_app": "https://github.com/TheophilusChinomona/sentio-marketing/tree/v0.1.0",
+        "marketing_app": "https://github.com/TheophilusChinomona/sentio-marketing/tree/v0.1.1",
         "note": "These repositories include build and installation instructions. Deploy an exact source revision with each release.",
     }
 
