@@ -1,0 +1,217 @@
+# Staging first. Separate project/site per client. Existing volumes are not reset.
+services:
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    command:
+    - --character-set-server=utf8mb4
+    - --collation-server=utf8mb4_unicode_ci
+    - --skip-character-set-client-handshake
+    - --innodb-snapshot-isolation=OFF
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in Dokploy Environment}
+    volumes:
+    - database:/var/lib/mysql
+    networks:
+    - application
+    healthcheck:
+      test:
+      - CMD
+      - healthcheck.sh
+      - --connect
+      - --innodb_initialized
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+  redis-cache:
+    image: redis:8.6-alpine
+    restart: unless-stopped
+    networks:
+    - application
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 10s
+      timeout: 3s
+      retries: 20
+  redis-queue:
+    image: redis:8.6-alpine
+    restart: unless-stopped
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    volumes:
+    - queue:/data
+    networks:
+    - application
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 10s
+      timeout: 3s
+      retries: 20
+  configurator:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: 'no'
+    volumes: &id001
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+    networks: &id002
+    - application
+    entrypoint:
+    - bash
+    - -ec
+    command:
+    - "echo \"Configuring Frappe CRM at $$(pwd)\"\nif [ ! -d apps/crm ] || [ ! -d apps/sentio_marketing ]; then\n\
+      \  echo \"ERROR: this image is missing apps/crm. CRM must be included in the image build.\" >&2\n  echo \"\
+      App folders found:\" >&2\n  ls -1 apps >&2\n  exit 1\nfi\nls -1 apps > sites/apps.txt\nbench set-config -g\
+      \ db_host db\nbench set-config -gp db_port 3306\nbench set-config -g redis_cache redis://redis-cache:6379\n\
+      bench set-config -g redis_queue redis://redis-queue:6379\nbench set-config -g redis_socketio redis://redis-queue:6379\n\
+      bench set-config -gp socketio_port 9000\n"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+  create-site:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: 'no'
+    volumes: *id001
+    networks: *id002
+    entrypoint:
+    - bash
+    - -ec
+    environment:
+      CRM_SITE: ${CRM_SITE:?Set the CRM hostname, without https://}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+      CRM_ADMIN_PASSWORD: ${CRM_ADMIN_PASSWORD:?Set CRM_ADMIN_PASSWORD}
+      SENTIO_CLIENT_ID: ${SENTIO_CLIENT_ID:?Choose the client for this isolated site}
+    command:
+    - "if [ -f \"sites/$${CRM_SITE}/site_config.json\" ]; then\n  if [ -f \"sites/$${CRM_SITE}/.sentio-bootstrap-complete\"\
+      \ ]; then\n    echo \"Existing Sentio site retained; follow the release migration runbook for upgrades.\"\n\
+      \    exit 0\n  fi\n  echo \"Existing CRM site detected. Back up and follow the explicit upgrade runbook; nothing\
+      \ was reset.\" >&2\n  exit 1\nfi\nbench new-site \"$${CRM_SITE}\" --db-root-username root --db-root-password\
+      \ \"$${DB_ROOT_PASSWORD}\" --admin-password \"$${CRM_ADMIN_PASSWORD}\" --mariadb-user-host-login-scope='%'\
+      \ --install-app crm\nbench --site \"$${CRM_SITE}\" install-app sentio_marketing\nbench --site \"$${CRM_SITE}\"\
+      \ execute sentio_marketing.install.configure_site --kwargs \"{\\\"client_id\\\":\\\"$${SENTIO_CLIENT_ID}\\\
+      \"}\"\nbench --site \"$${CRM_SITE}\" set-config host_name \"https://$${CRM_SITE}\"\nbench --site \"$${CRM_SITE}\"\
+      \ enable-scheduler\ntouch \"sites/$${CRM_SITE}/.sentio-bootstrap-complete\"\n"
+    depends_on:
+      configurator:
+        condition: service_completed_successfully
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+  backend:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes: *id001
+    networks: *id002
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+    build:
+      context: https://github.com/frappe/frappe_docker.git#85ad653360e4670c2e885c4283d293e7b9efeda9
+      dockerfile: images/layered/Containerfile
+      args:
+        FRAPPE_BRANCH: version-16
+        FRAPPE_PATH: https://github.com/frappe/frappe
+      secrets:
+      - apps_json
+  websocket:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes: *id001
+    networks: *id002
+    command:
+    - node
+    - /home/frappe/frappe-bench/apps/frappe/socketio.js
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+  worker:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes: *id001
+    networks: *id002
+    command:
+    - bench
+    - worker
+    - --queue
+    - short,default,long
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+  scheduler:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes: *id001
+    networks: *id002
+    command:
+    - bench
+    - schedule
+    depends_on:
+      create-site:
+        condition: service_completed_successfully
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+  frontend:
+    image: local/sentio-crm:0.1.0
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes: *id001
+    networks:
+    - application
+    - dokploy-network
+    command:
+    - nginx-entrypoint.sh
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      FRAPPE_SITE_NAME_HEADER: ${CRM_SITE:?Set CRM_SITE}
+      NGINX_LISTEN_PORT: '8080'
+      CLIENT_MAX_BODY_SIZE: 50m
+      PROXY_READ_TIMEOUT: '120'
+    expose:
+    - '8080'
+    depends_on:
+      backend:
+        condition: service_started
+      websocket:
+        condition: service_started
+    pull_policy: never
+    working_dir: /home/frappe/frappe-bench
+volumes:
+  sites: {}
+  logs: {}
+  database: {}
+  queue: {}
+networks:
+  application:
+    driver: bridge
+  dokploy-network:
+    external: true
+secrets:
+  apps_json:
+    environment: FRAPPE_APPS_JSON

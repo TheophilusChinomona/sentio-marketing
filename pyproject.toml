@@ -1,0 +1,16 @@
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "sentio_marketing"
+authors = [{ name = "Sentio Langley" }]
+dynamic = ["version"]
+description = "Source-backed research and reviewed outreach for client-hosted Frappe CRM"
+requires-python = ">=3.10"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0,<17.0.0"
+crm = ">=16.0.0,<17.0.0"

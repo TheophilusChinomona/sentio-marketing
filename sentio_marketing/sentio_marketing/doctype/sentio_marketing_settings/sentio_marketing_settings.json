@@ -1,0 +1,59 @@
+{
+  "doctype": "DocType",
+  "name": "Sentio Marketing Settings",
+  "module": "Sentio Marketing",
+  "custom": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "field_order": [
+    "client_id",
+    "outreach_enabled",
+    "sender_domain",
+    "source_url",
+    "app_source_url"
+  ],
+  "fields": [
+    {
+      "fieldname": "client_id",
+      "label": "Client ID",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "outreach_enabled",
+      "label": "Enable reviewed CRM outreach",
+      "fieldtype": "Check",
+      "default": 0
+    },
+    {
+      "fieldname": "sender_domain",
+      "label": "Authorised sender domain",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "source_url",
+      "label": "CRM source code",
+      "fieldtype": "Data",
+      "default": "https://github.com/TheophilusChinomona/sentio-crm/tree/sentio-v0.1.0"
+    },
+    {
+      "fieldname": "app_source_url",
+      "label": "Marketing app source",
+      "fieldtype": "Data",
+      "default": "https://github.com/TheophilusChinomona/sentio-marketing/tree/v0.1.0"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "issingle": 1
+}

@@ -1,0 +1,5 @@
+CRM_SITE=crm-staging.example.com
+SENTIO_CLIENT_ID=pilot-client
+DB_ROOT_PASSWORD=REPLACE_WITH_UNIQUE_RANDOM_VALUE
+CRM_ADMIN_PASSWORD=REPLACE_WITH_DIFFERENT_RANDOM_VALUE
+FRAPPE_APPS_JSON=[{"url":"https://github.com/TheophilusChinomona/sentio-crm","branch":"sentio-v0.1.0"},{"url":"https://github.com/TheophilusChinomona/sentio-marketing","branch":"v0.1.0"}]

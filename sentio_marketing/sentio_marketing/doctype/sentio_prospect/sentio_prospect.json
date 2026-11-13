@@ -1,0 +1,282 @@
+{
+  "doctype": "DocType",
+  "name": "Sentio Prospect",
+  "module": "Sentio Marketing",
+  "custom": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "field_order": [
+    "source_key",
+    "client_id",
+    "account_id",
+    "contact_id",
+    "company",
+    "person_name",
+    "email",
+    "phone",
+    "website",
+    "organization",
+    "crm_lead",
+    "selected",
+    "email_type",
+    "role_status",
+    "verification_status",
+    "verification_provider",
+    "verified_at",
+    "verification_ref",
+    "review_status",
+    "fit",
+    "timing",
+    "source_confidence",
+    "customer_screening",
+    "dnc_consent",
+    "duplicate_group",
+    "source_url",
+    "source_run",
+    "notes",
+    "approval_status",
+    "eligibility_evidence",
+    "approved_fingerprint",
+    "reviewed_by",
+    "reviewed_at",
+    "follow_up_status"
+  ],
+  "fields": [
+    {
+      "fieldname": "source_key",
+      "label": "Source identity",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "unique": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "client_id",
+      "label": "Client ID",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "account_id",
+      "label": "Source account ID",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "contact_id",
+      "label": "Source contact ID",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "company",
+      "label": "Company",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "person_name",
+      "label": "Contact name",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "email",
+      "label": "Email",
+      "fieldtype": "Data",
+      "options": "Email",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "phone",
+      "label": "Public phone",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "website",
+      "label": "Website",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "organization",
+      "label": "CRM organization",
+      "fieldtype": "Link",
+      "options": "CRM Organization"
+    },
+    {
+      "fieldname": "crm_lead",
+      "label": "CRM lead",
+      "fieldtype": "Link",
+      "options": "CRM Lead",
+      "read_only": 1
+    },
+    {
+      "fieldname": "selected",
+      "label": "Selected research candidate",
+      "fieldtype": "Check"
+    },
+    {
+      "fieldname": "email_type",
+      "label": "Email type",
+      "fieldtype": "Select",
+      "options": "named-work\nshared-work\nunknown"
+    },
+    {
+      "fieldname": "role_status",
+      "label": "Role evidence",
+      "fieldtype": "Select",
+      "options": "supported\nconflicting\nunknown"
+    },
+    {
+      "fieldname": "verification_status",
+      "label": "Mailbox verification",
+      "fieldtype": "Select",
+      "options": "valid\ninvalid\ncatch-all\nunknown\nunverified",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "verification_provider",
+      "label": "Verification provider",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "verified_at",
+      "label": "Provider observation time",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "verification_ref",
+      "label": "Provider receipt",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "review_status",
+      "label": "Research review",
+      "fieldtype": "Select",
+      "options": "draft\nreviewed\napproved\nhold\nexcluded",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "source_url",
+      "label": "Primary source URL",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "source_run",
+      "label": "Source research run",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "notes",
+      "label": "Research notes",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "approval_status",
+      "label": "Outreach approval",
+      "fieldtype": "Select",
+      "options": "Pending\nApproved\nRejected",
+      "default": "Pending",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "eligibility_evidence",
+      "label": "Eligibility evidence",
+      "fieldtype": "Long Text",
+      "read_only": 1
+    },
+    {
+      "fieldname": "approved_fingerprint",
+      "label": "Reviewed record fingerprint",
+      "fieldtype": "Data",
+      "hidden": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "reviewed_by",
+      "label": "Reviewed by",
+      "fieldtype": "Link",
+      "options": "User",
+      "read_only": 1
+    },
+    {
+      "fieldname": "reviewed_at",
+      "label": "Reviewed at",
+      "fieldtype": "Datetime",
+      "read_only": 1
+    },
+    {
+      "fieldname": "follow_up_status",
+      "label": "Follow-up state",
+      "fieldtype": "Select",
+      "options": "Not started\nReady\nReplied\nOpted out\nBounced\nPaused",
+      "default": "Not started",
+      "read_only": 1
+    },
+    {
+      "fieldname": "fit",
+      "label": "Account fit",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "timing",
+      "label": "Buying timing evidence",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "source_confidence",
+      "label": "Source confidence",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "customer_screening",
+      "label": "Imported customer/supplier screening",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "dnc_consent",
+      "label": "Imported DNC/consent state",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "duplicate_group",
+      "label": "Unresolved duplicate group",
+      "fieldtype": "Data"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sentio Marketing Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sales User",
+      "read": 1,
+      "write": 1,
+      "report": 1,
+      "print": 1
+    }
+  ],
+  "autoname": "field:source_key",
+  "title_field": "company",
+  "search_fields": "company,person_name,email,account_id"
+}

@@ -1,0 +1,93 @@
+{
+  "doctype": "DocType",
+  "name": "Sentio Evidence",
+  "module": "Sentio Marketing",
+  "custom": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "field_order": [
+    "evidence_key",
+    "prospect",
+    "field_name",
+    "claim",
+    "source_url",
+    "observed_at",
+    "evidence_status"
+  ],
+  "fields": [
+    {
+      "fieldname": "evidence_key",
+      "label": "Evidence identity",
+      "fieldtype": "Data",
+      "unique": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "prospect",
+      "label": "Researched prospect",
+      "fieldtype": "Link",
+      "options": "Sentio Prospect",
+      "reqd": 1
+    },
+    {
+      "fieldname": "field_name",
+      "label": "Observed field",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "claim",
+      "label": "Observation",
+      "fieldtype": "Long Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "source_url",
+      "label": "Source URL",
+      "fieldtype": "Small Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "observed_at",
+      "label": "Observed at",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "evidence_status",
+      "label": "Evidence status",
+      "fieldtype": "Select",
+      "options": "observed\nclient-confirmed\ninferred\nunknown",
+      "reqd": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sentio Marketing Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sales User",
+      "read": 1,
+      "write": 0,
+      "report": 1,
+      "print": 1
+    }
+  ],
+  "autoname": "field:evidence_key"
+}

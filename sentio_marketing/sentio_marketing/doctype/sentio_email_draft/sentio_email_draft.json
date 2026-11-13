@@ -1,0 +1,88 @@
+{
+  "doctype": "DocType",
+  "name": "Sentio Email Draft",
+  "module": "Sentio Marketing",
+  "custom": 0,
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "field_order": [
+    "prospect",
+    "subject",
+    "body",
+    "source_notes",
+    "draft_status",
+    "content_fingerprint"
+  ],
+  "fields": [
+    {
+      "fieldname": "prospect",
+      "label": "Researched prospect",
+      "fieldtype": "Link",
+      "options": "Sentio Prospect",
+      "reqd": 1
+    },
+    {
+      "fieldname": "subject",
+      "label": "Subject",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "body",
+      "label": "Email body",
+      "fieldtype": "Text Editor",
+      "reqd": 1
+    },
+    {
+      "fieldname": "source_notes",
+      "label": "Claim/source notes",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "draft_status",
+      "label": "Draft review",
+      "fieldtype": "Select",
+      "options": "Draft\nReviewed",
+      "default": "Draft",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "content_fingerprint",
+      "label": "Reviewed content fingerprint",
+      "fieldtype": "Data",
+      "hidden": 1,
+      "read_only": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sentio Marketing Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Sales User",
+      "read": 1,
+      "write": 1,
+      "report": 1,
+      "print": 1,
+      "create": 1
+    }
+  ],
+  "autoname": "hash"
+}
